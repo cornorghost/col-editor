@@ -4,7 +4,7 @@
 
 网络连接websocket，mysql保存数据，后端采用c++编写
 
-
+![img](https://github.com/cornorghost/col-edictor/blob/master/img/Snipaste_2022-04-11_22-37-33.png)
 
 ## Project setup
 ```
