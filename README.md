@@ -1,5 +1,11 @@
 # col-edictor
 
+基于monaco edictor打造vscode风格的多人在线编辑器，使用新秀naive ui
+
+网络连接websocket，mysql保存数据，后端采用c++编写
+
+
+
 ## Project setup
 ```
 npm install
