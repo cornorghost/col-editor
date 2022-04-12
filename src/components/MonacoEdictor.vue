@@ -1,9 +1,5 @@
 <template>
-  <div
-    ref="container"
-    class="monaco-editor"
-    :style="`height: ${height}px`"
-  ></div>
+  <div ref="container" id="monaco-editor"></div>
 </template>
 
 <script>
@@ -17,14 +13,6 @@ export default {
         return {};
       },
     },
-    height: {
-      type: String,
-      default: "100%",
-    },
-    isDiff: {
-      type: Boolean,
-      default: false,
-    },
   },
   mounted() {
     this.init();
@@ -37,6 +25,7 @@ export default {
         theme: "vs-dark", // 编辑器主题：vs, hc-black, or vs-dark，更多选择详见官网
         roundedSelection: true, // 右侧不显示编辑器预览框
         autoIndent: true, // 自动缩进
+        automaticLayout: true, //自适应layout
         minimap: {
           enable: true,
         },
@@ -57,6 +46,14 @@ export default {
         this.$refs.container,
         editorOptions
       );
+    },
+    //改变主题
+    setTheme(val) {
+      monaco.editor.setTheme(val);
+    },
+    //改变语言
+    setLanguage(val) {
+      monaco.editor.setModelLanguage(this.monacoEditor.getModel(), val);
     },
   },
 };

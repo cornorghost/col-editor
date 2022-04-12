@@ -10,47 +10,51 @@
       </n-message-provider>
     </n-config-provider>
     <!--//配置修改-->
-    <div class="header">
+    <div id="header">
       <div class="selectOpt">
-        <span style="width: 20%">主 题</span>
+        <span style="width: 20%; color: rgba(255, 255, 255, 0.8)">主 题</span>
         <n-select
           :options="themeOptions"
           :placeholder="opts.theme"
           size="small"
           style="width: 80%"
+          @update:value="changeTheme"
         />
       </div>
 
       <div class="selectOpt">
-        <div style="width: 20%">语 言</div>
+        <div style="width: 20%; color: rgba(255, 255, 255, 0.8)">语 言</div>
         <n-select
           :options="languageOptions"
           :placeholder="opts.language"
           size="small"
           style="width: 80%"
+          @update:value="changeLanguage"
         />
       </div>
     </div>
     <!--//编辑器部分-->
-    <monaco ref="monaco" :opts="opts" :height="'600'"></monaco>
+    <div id="monaco-out-container">
+      <monaco ref="monaco" :opts="opts"></monaco>
+    </div>
+    <AvatarList ref="avatars" id="avatarList"></AvatarList>
   </div>
 </template>
 
 <script>
 import monaco from "./components/MonacoEdictor";
 import dialogCol from "./components/GDialog";
+import AvatarList from "./components/AvatarList";
 import { darkTheme } from "naive-ui";
 
 export default {
-  components: { monaco, dialogCol },
+  components: { monaco, dialogCol, AvatarList },
 
   mounted() {
-    // this.ifShowOpenDialog=true;
+    this.init();
     this.$refs.gdialog.handleSuccess(); //打开成功消息提示
   },
-  created() {
-    // this.ifShowOpenDialog=true;
-  },
+  created() {},
   data() {
     return {
       themeOptions: [
@@ -292,33 +296,62 @@ export default {
         language: "cpp", // 语言类型
         theme: "vs-dark", // 编辑器主题
       },
-      darkTheme,
+      darkTheme, //暗黑猪头
+      monaocoIns: {}, //编辑器对象
+      // ws: {}, //websocket对象
     };
   },
 
-  methods: {},
+  methods: {
+    //一些初始化工作
+    init() {
+      this.monaocoIns = this.$refs.monaco.monacoEditor;
+      // this.ws=this.$refs.monaco.monacoEditor;
+    },
+    //改变主题
+    changeTheme(val) {
+      this.$refs.monaco.setTheme(val);
+    },
+    //改变主题
+    changeLanguage(val) {
+      this.$refs.monaco.setLanguage(val);
+    },
+    //新用户上线添加显示
+    addNewCoder() {
+      this.$refs.avatars.add();
+    },
+  },
 };
 </script>
 
 <style>
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin: 20px 0;
+  background-color: rgba(44, 44, 50, 1);
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  margin-top: 0.5%;
+  min-height: 100%;
 }
 
-.header {
+#header {
   display: flex;
   flex-direction: row;
   justify-content: center;
   width: 100%;
+  margin-top: 1%;
+  margin-bottom: 1%;
 }
 
 .selectOpt {
@@ -328,7 +361,19 @@ export default {
   margin: 0px 5% 0.5% 5%;
 }
 
-.monaco-editor {
+#monaco-editor {
   text-align: left;
+  width: 100%;
+  height: 100%;
+}
+#monaco-out-container {
+  width: 100%;
+  height: 100%;
+}
+
+#avatarList {
+  display: flex;
+  margin-top: 1%;
+  margin-bottom: 1%;
 }
 </style>

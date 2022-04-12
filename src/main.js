@@ -14,10 +14,11 @@ import {
     NDialogProvider,
     NMessageProvider,
     NConfigProvider,
+    NAvatarGroup,
   } from 'naive-ui';
 
 const naive = create({
-components: [NButton, NSelect, darkTheme, NDialog, NDialogProvider, NMessageProvider, NConfigProvider]
+components: [NButton, NSelect, darkTheme, NDialog, NDialogProvider, NMessageProvider, NConfigProvider, NAvatarGroup]
 })
 
 createApp(App).use(store).use(router).use(naive).mount("#app");
