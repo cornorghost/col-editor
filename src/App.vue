@@ -9,7 +9,11 @@
         </n-dialog-provider>
       </n-message-provider>
     </n-config-provider>
-    <!--//配置修改-->
+
+    <!--//定义全局的消息框-->
+    <webSocket ref="websock"></webSocket>
+
+    <!--//全局配置栏-->
     <div id="header">
       <div class="selectOpt">
         <span style="width: 20%; color: rgba(255, 255, 255, 0.8)">主 题</span>
@@ -33,26 +37,33 @@
         />
       </div>
     </div>
+
     <!--//编辑器部分-->
     <div id="monaco-out-container">
       <monaco ref="monaco" :opts="opts"></monaco>
     </div>
-    <AvatarList ref="avatars" id="avatarList"></AvatarList>
+
+    <!-- <n-button @click="test">ceshi</n-button>> -->
+    <!--//底部显示共同编辑人员-->
+    <avatarList ref="avatars" id="avatarList"></avatarList>
   </div>
 </template>
 
 <script>
+import webSocket from "./components/WebSocket";
 import monaco from "./components/MonacoEdictor";
 import dialogCol from "./components/GDialog";
-import AvatarList from "./components/AvatarList";
+import avatarList from "./components/AvatarList";
 import { darkTheme } from "naive-ui";
 
 export default {
-  components: { monaco, dialogCol, AvatarList },
+  components: { monaco, dialogCol, avatarList, webSocket },
 
   mounted() {
     this.init();
-    this.$refs.gdialog.handleSuccess(); //打开成功消息提示
+    // this.$refs.gdialog.handleSuccess(); //打开成功消息提示
+    this.$refs.monaco.bind();
+    this.$refs.websock.bind();
   },
   created() {},
   data() {
@@ -320,6 +331,7 @@ export default {
     addNewCoder() {
       this.$refs.avatars.add();
     },
+    test() {},
   },
 };
 </script>
@@ -359,6 +371,7 @@ body {
   display: flex;
   flex-direction: row;
   margin: 0px 5% 0.5% 5%;
+  text-align: left;
 }
 
 #monaco-editor {

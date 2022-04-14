@@ -24,6 +24,7 @@ export default {
     init() {
       this.dialog = useDialog();
       this.message = useMessage();
+      this.$store.commit("setGlobalDialog", this); //定义成全局变量
     },
     handleConfirm() {
       this.dialog.warning({
