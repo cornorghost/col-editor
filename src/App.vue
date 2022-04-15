@@ -10,6 +10,13 @@
       </n-message-provider>
     </n-config-provider>
 
+    <!--//定义全局的加载条-->
+    <n-config-provider :theme="darkTheme">
+      <n-message-provider
+        ><n-dialog-provider><spinCol ref="gspin"></spinCol> </n-dialog-provider>
+      </n-message-provider>
+    </n-config-provider>
+
     <!--//定义全局的消息框-->
     <webSocket ref="websock"></webSocket>
 
@@ -53,11 +60,12 @@
 import webSocket from "./components/WebSocket";
 import monaco from "./components/MonacoEdictor";
 import dialogCol from "./components/GDialog";
+import spinCol from "./components/GSpin";
 import avatarList from "./components/AvatarList";
 import { darkTheme } from "naive-ui";
 
 export default {
-  components: { monaco, dialogCol, avatarList, webSocket },
+  components: { monaco, dialogCol, avatarList, webSocket, spinCol },
 
   mounted() {
     this.init();
@@ -331,7 +339,9 @@ export default {
     addNewCoder() {
       this.$refs.avatars.add();
     },
-    test() {},
+    test() {
+      this.$refs.websock.reConnect();
+    },
   },
 };
 </script>
@@ -362,8 +372,9 @@ body {
   flex-direction: row;
   justify-content: center;
   width: 100%;
-  margin-top: 1%;
+  margin-top: 0.5%;
   margin-bottom: 1%;
+  min-height: 2%;
 }
 
 .selectOpt {
@@ -382,11 +393,14 @@ body {
 #monaco-out-container {
   width: 100%;
   height: 100%;
+  min-height: 50%;
+  max-height: 100%;
 }
 
 #avatarList {
   display: flex;
   margin-top: 1%;
-  margin-bottom: 1%;
+  margin-bottom: 0.5%;
+  min-height: 4%;
 }
 </style>

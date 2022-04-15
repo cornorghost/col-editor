@@ -9,6 +9,9 @@ import {
     // component
     NButton,
     NSelect,
+    NSpin,
+    NAlert,
+    NModal,
     darkTheme,
     NDialog,
     NDialogProvider,
@@ -18,7 +21,7 @@ import {
   } from 'naive-ui';
 
 const naive = create({
-components: [NButton, NSelect, darkTheme, NDialog, NDialogProvider, NMessageProvider, NConfigProvider, NAvatarGroup]
+components: [NButton, NSelect, NSpin, NAlert, NModal, darkTheme, NDialog, NDialogProvider, NMessageProvider, NConfigProvider, NAvatarGroup]
 })
 
 createApp(App).use(store).use(router).use(naive).mount("#app");

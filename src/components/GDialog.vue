@@ -8,10 +8,10 @@ import { useDialog, useMessage } from "naive-ui";
 export default {
   created() {
     // this.ifShowOpenDialog=true;
-    this.init();
   },
   mounted() {
     // console.log("ok!!!!!!!!!!");
+    this.init();
   },
   data() {
     return {

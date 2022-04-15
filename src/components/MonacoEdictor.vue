@@ -38,6 +38,7 @@ export default {
       monacoEditor: {}, // 编辑器对象
 
       compositonState: ref("end"), //这是在中文输入法下解决没打完字就触发change事件
+      compositionChangeEvent: {}, //记录中文输入法下的change
     };
   },
 
@@ -68,7 +69,13 @@ export default {
     //定义绑定某些方法
     bind() {
       this.monacoEditor.getModel().onDidChangeContent((event) => {
-        if (this.compositonState == "sta") return;
+        if (this.compositonState == "sta") {
+          if (this.$store.state.modify) {
+            let changes = event.changes[0];
+            this.compositionChangeEvent = changes;
+          }
+          return;
+        }
         var changes = event.changes[0];
         //添加新的键值
         console.log(this.$store.state.g_ws.global_id);
@@ -100,16 +107,34 @@ export default {
       });
       //中文输入法结束
       this.monacoEditor.onDidCompositionEnd((event) => {
-        // console.log("comend");
+        console.log("comend");
         this.compositonState = "end";
+
+        var changes = this.compositionChangeEvent;
+        //添加新的键值
+        console.log(this.$store.state.g_ws.global_id);
+        changes["uid"] = this.$store.state.g_ws.global_id;
+        changes["mes_type"] = 1;
+        changes["body"] = [];
+        for (var i = 1; i <= this.monacoEditor.getModel().getLineCount(); i++) {
+          changes["body"].push(
+            Base64.encode(toRaw(this.monacoEditor).getModel().getLineContent(i))
+          );
+        }
+        // console.log(toRaw(this.monacoEditor).getValue());
+        console.log(this.$store.state.modify);
+        if (this.$store.state.modify) {
+          console.log(JSON.stringify(changes));
+          this.$store.state.g_ws.ws.send(JSON.stringify(changes));
+        }
       });
       //中文输入法下等待空格
       this.monacoEditor.onKeyDown((event) => {
         // console.log(event);
-        if (this.compositonState == "sta" && event.code == "Space") {
-          console.log("触发");
-          this.compositonState = "end";
-        }
+        // if (this.compositonState == "sta" && event.code == "Space") {
+        //   console.log("触发");
+        //   this.compositonState = "end";
+        // }
       });
     },
   },

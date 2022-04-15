@@ -1,5 +1,5 @@
 <template>
-  <div class="websocket"></div>
+  <div id="websocket"></div>
 </template>
 
 <script>
@@ -22,6 +22,8 @@ export default {
       flush_id: {}, //主要心跳程序id
       heartPerTime: 800, //每隔800ms发送一次心跳包
       maxHeartTime: 200, //最大能接受的网络延时
+      reConnectTime: 3000, //冲脸的事件间隔
+      lockReconnect: false, //是否真正建立连接
     };
   },
 
@@ -59,15 +61,15 @@ export default {
     //     }
     //   }, 1);
 
-      // //延迟过高
-      // if (this.timeCount > 200) {
-      //   clearInterval(this.flush_id);
-      // }
+    // //延迟过高
+    // if (this.timeCount > 200) {
+    //   clearInterval(this.flush_id);
+    // }
 
-      // //连接错误
-      // if (this.ws.readyState != 1) {
-      //   clearInterval(this.flush_id);
-      // }
+    // //连接错误
+    // if (this.ws.readyState != 1) {
+    //   clearInterval(this.flush_id);
+    // }
     // },
     // //开始计算延时
     // beginPing() {
@@ -81,17 +83,36 @@ export default {
     getHeartMesId() {
       return ++this.heartMesId % 1000;
     },
+
+    //重连函数
+    reConnect() {
+      var that = this; // 不是很明白这里必须要用that接收this，否则this指向了一个奇怪的值
+      if (that.lockReconnect) {
+        return;
+      }
+      that.lockReconnect = true;
+      setTimeout(function () {
+        //没连接上会一直重连，设置延迟避免请求过多
+        that.init();
+        that.bind();
+        that.lockReconnect = false;
+      }, this.reConnectTime);
+    },
+
     //定义绑定某些方法
     bind() {
       //打开时的方法
       this.ws.onopen = () => {
         this.$store.state.g_dialog.handleSuccess(); //打开成功消息提示
+        this.$store.commit("setReadyState", 1);
       };
 
       //关闭时的方法
       this.ws.onclose = () => {
         console.log("close connection");
-        this.clearTime();
+        // this.clearTime();
+        this.$store.commit("setReadyState", 0);
+        this.reConnect();
       };
 
       //处理消息
@@ -111,8 +132,8 @@ export default {
                 // this.modify = 0;
                 this.$store.commit("setModify", 0);
                 //console.log(text['body']);
-                // eslint-disable-next-line no-case-declarations
-                let connet_text = "";
+
+                var connet_text = "";
                 for (let i = 0; i < text["body"].length; i++) {
                   if (i == text["body"].length - 1)
                     connet_text += Base64.decode(text["body"][i]);
@@ -124,23 +145,23 @@ export default {
                 break;
               case 1:
                 //console.log("message");
-                if (this.global_id != text["uid"]) {
-                  //   this.modify = 0;
-                  this.$store.commit("setModify", 0);
-                  var options = {
-                    range: text["range"],
-                    rangeLength: ["range"],
-                    text: text["text"],
-                    rangeOffset: text["rangeOffset"],
-                    forceMoveMarkers: text["forceMoveMarkers"],
-                  };
-                  toRaw(this.$store.state.g_monaco).executeEdits(
-                    this.this.$store.state.g_monaco.root,
-                    [options]
-                  );
-                  //   this.modify = 1;
-                  this.$store.commit("setModify", 1);
-                }
+                //if (this.global_id != text["uid"]) {
+                //   this.modify = 0;
+                this.$store.commit("setModify", 0);
+                var options = {
+                  range: text["range"],
+                  rangeLength: ["range"],
+                  text: text["text"],
+                  rangeOffset: text["rangeOffset"],
+                  forceMoveMarkers: text["forceMoveMarkers"],
+                };
+                toRaw(this.$store.state.g_monaco).executeEdits(
+                  this.this.$store.state.g_monaco.root,
+                  [options]
+                );
+                //   this.modify = 1;
+                this.$store.commit("setModify", 1);
+                //}
                 break;
               case 2:
                 //console.log("heart");
@@ -154,26 +175,31 @@ export default {
           reader.readAsText(evt.data);
         } else if (evt.data.constructor == String) {
           let text = JSON.parse(evt.data);
+          console.log("text");
           console.log(text);
 
-          if (this.global_id != text["uid"]) {
-            // this.modify = 0;
-            this.$store.commit("setModify", 0);
-            var options = {
-              range: text["range"],
-              rangeLength: ["range"],
-              text: text["text"],
-              rangeOffset: text["rangeOffset"],
-              forceMoveMarkers: text["forceMoveMarkers"],
-            };
-            toRaw(this.$store.state.g_monaco).executeEdits(
-              this.$store.state.g_monaco.root,
-              [options]
-            );
-            // this.modify = 1;
-            this.$store.commit("setModify", 1);
-          }
+          //if (this.global_id != text["uid"]) {
+          // this.modify = 0;
+          this.$store.commit("setModify", 0);
+          var options = {
+            range: text["range"],
+            rangeLength: ["range"],
+            text: text["text"],
+            rangeOffset: text["rangeOffset"],
+            forceMoveMarkers: text["forceMoveMarkers"],
+          };
+          toRaw(this.$store.state.g_monaco).executeEdits(
+            this.$store.state.g_monaco.root,
+            [options]
+          );
+          // this.modify = 1;
+          this.$store.commit("setModify", 1);
+          //}
         }
+      };
+
+      this.ws.onerror = () => {
+        this.reConnect();
       };
     },
   },
