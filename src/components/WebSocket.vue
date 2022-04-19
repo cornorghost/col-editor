@@ -12,20 +12,22 @@ export default {
       path: "ws://192.168.157.128:3000",
       ws: {},
 
-      isReady: false, //是否准备好
-
       global_id: "", //全局的消息包id
 
       ping_id: {}, //计时器id
       flush_id: {}, //主要心跳程序id
 
-      timeCount: 0, //计算延时
+      // timeCount: 0, //计算延时
       heartMesId: 0, //心跳包id
-      heartFlag: 1, //是否要开始刷新计算心跳显示值
+      // heartFlag: 1, //是否要开始刷新计算心跳显示值
       heartPerTime: 2000, //每隔800ms发送一次心跳包
       maxHeartTime: 300, //最大能接受的网络延时
       reConnectTime: 3000, //冲脸的事件间隔
       lockReconnect: false, //是否真正建立连接
+
+      pingValue: 0, //网络延迟值
+      pingSendTime: 0, //发送心跳包之前的时间
+      pingReceiveTime: 0, //接收心跳包之后的时间
     };
   },
 
@@ -45,7 +47,7 @@ export default {
     pingrun() {
       if (this.heartFlag) {
         // document.getElementById("delay").innerHTML = this.timeCount;
-        console.log(this.timeCount);
+        // console.log(this.timeCount);
         //$("#delay").val(INDEX);
         clearInterval(this.ping_id);
         //clearInterval(id2);
@@ -65,9 +67,11 @@ export default {
       heartMes["heartMesId"] = this.heartMesId;
       this.heartFlag = 0;
 
-      this.ping_id = setInterval(this.pingrun, 1);
+      // this.ping_id = setInterval(this.pingrun, 1);
 
       this.ws.send(JSON.stringify(heartMes));
+
+      this.pingSendTime = new Date().getTime();
 
       //延迟过高
       if (this.timeCount > this.maxHeartTime) {
@@ -168,6 +172,10 @@ export default {
                 break;
               case 2:
                 if (text["heartMesId"] == this.heartMesId) {
+                  this.pingReceiveTime = new Date().getTime();
+                  this.pingValue = this.pingReceiveTime - this.pingSendTime;
+                  this.getHeartMesId();
+                  console.log(this.pingValue);
                   this.heartFlag = 1;
                 }
                 break;
@@ -200,6 +208,7 @@ export default {
       };
 
       this.ws.onerror = () => {
+        this.$store.commit("setReadyState", 0);
         this.reConnect();
       };
     },
