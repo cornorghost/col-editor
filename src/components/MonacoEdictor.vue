@@ -33,6 +33,7 @@ export default {
         minimap: {
           enable: true,
         },
+        maxTokenizationLineLength: 100,
       },
 
       monacoEditor: {}, // 编辑器对象
@@ -78,7 +79,7 @@ export default {
         }
         var changes = event.changes[0];
         //添加新的键值
-        console.log(this.$store.state.g_ws.global_id);
+        // console.log(this.$store.state.g_ws.global_id);
         changes["uid"] = this.$store.state.g_ws.global_id;
         changes["mes_type"] = 1;
         changes["body"] = [];
@@ -88,7 +89,7 @@ export default {
           );
         }
         // console.log(toRaw(this.monacoEditor).getValue());
-        console.log(this.$store.state.modify);
+        // console.log(this.$store.state.modify);
         if (this.$store.state.modify) {
           // console.log(JSON.stringify(changes));
           this.$store.state.g_ws.ws.send(JSON.stringify(changes));
@@ -107,12 +108,12 @@ export default {
       });
       //中文输入法结束
       this.monacoEditor.onDidCompositionEnd((event) => {
-        console.log("comend");
+        // console.log("comend");
         this.compositonState = "end";
 
         var changes = this.compositionChangeEvent;
         //添加新的键值
-        console.log(this.$store.state.g_ws.global_id);
+        // console.log(this.$store.state.g_ws.global_id);
         changes["uid"] = this.$store.state.g_ws.global_id;
         changes["mes_type"] = 1;
         changes["body"] = [];
@@ -122,9 +123,9 @@ export default {
           );
         }
         // console.log(toRaw(this.monacoEditor).getValue());
-        console.log(this.$store.state.modify);
+        // console.log(this.$store.state.modify);
         if (this.$store.state.modify) {
-          console.log(JSON.stringify(changes));
+          // console.log(JSON.stringify(changes));
           this.$store.state.g_ws.ws.send(JSON.stringify(changes));
         }
       });

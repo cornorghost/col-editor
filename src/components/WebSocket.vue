@@ -16,12 +16,14 @@ export default {
 
       global_id: "", //全局的消息包id
 
+      ping_id: {}, //计时器id
+      flush_id: {}, //主要心跳程序id
+
       timeCount: 0, //计算延时
       heartMesId: 0, //心跳包id
-      heartFlag: true, //是否要开始刷新计算心跳显示值
-      flush_id: {}, //主要心跳程序id
-      heartPerTime: 800, //每隔800ms发送一次心跳包
-      maxHeartTime: 200, //最大能接受的网络延时
+      heartFlag: 1, //是否要开始刷新计算心跳显示值
+      heartPerTime: 2000, //每隔800ms发送一次心跳包
+      maxHeartTime: 300, //最大能接受的网络延时
       reConnectTime: 3000, //冲脸的事件间隔
       lockReconnect: false, //是否真正建立连接
     };
@@ -39,49 +41,50 @@ export default {
       this.$store.commit("setGlobalWs", this); //定义成全局变量
     },
 
-    // // 计算网络延时的主要函数
-    // run() {
-    //   let heartMes = {};
-    //   heartMes["mes_type"] = 2;
-    //   heartMes["heartMesId"] = this.heartMesId;
-    //   this.ws.send(JSON.stringify(heartMes));
-    //   this.heartFlag = false;
+    //本地计时器
+    pingrun() {
+      if (this.heartFlag) {
+        // document.getElementById("delay").innerHTML = this.timeCount;
+        console.log(this.timeCount);
+        //$("#delay").val(INDEX);
+        clearInterval(this.ping_id);
+        //clearInterval(id2);
+        //id2=setInterval(run, 1000);
+        this.timeCount = 0;
+        this.getHeartMesId();
+      } else {
+        this.timeCount+=1;
+      }
+    },
 
-    //   let ping_id = setInterval(function run() {
-    //     if (this.heartFlag == true) {
-    //       document.getElementById("delay").innerHTML = this.timeCount;
-    //       //$("#delay").val(INDEX);
-    //       clearInterval(ping_id);
-    //       //clearInterval(id2);
-    //       //id2=setInterval(run, 1000);
-    //       this.timeCount = 0;
-    //       this.heartMesId = this.getHeartMesId();
-    //     } else {
-    //       this.timeCount++;
-    //     }
-    //   }, 1);
+    // 计算网络延时的主要函数
+    run() {
+      if (!this.$store.state.readyState) return;
+      let heartMes = {};
+      heartMes["mes_type"] = 2;
+      heartMes["heartMesId"] = this.heartMesId;
+      this.heartFlag = 0;
 
-    // //延迟过高
-    // if (this.timeCount > 200) {
-    //   clearInterval(this.flush_id);
-    // }
+      this.ping_id = setInterval(this.pingrun, 1);
 
-    // //连接错误
-    // if (this.ws.readyState != 1) {
-    //   clearInterval(this.flush_id);
-    // }
-    // },
-    // //开始计算延时
-    // beginPing() {
-    //   this.flush_id = setInterval(this.run, this.heartPerTime);
-    // },
-    // //辅助网络延时计算，清空当前计时器
-    // clearTime() {
-    //   clearInterval(this.flush_id);
-    // },
+      this.ws.send(JSON.stringify(heartMes));
+
+      //延迟过高
+      if (this.timeCount > this.maxHeartTime) {
+        clearInterval(this.flush_id);
+      }
+    },
+    //开始计算延时
+    beginPing() {
+      this.flush_id = setInterval(this.run, this.heartPerTime);
+    },
+    //辅助网络延时计算，清空当前计时器
+    clearTime() {
+      clearInterval(this.flush_id);
+    },
     //辅助网络延时计算，获取当前心跳包id
     getHeartMesId() {
-      return ++this.heartMesId % 1000;
+      this.heartMesId = (this.heartMesId + 1) % 1000;
     },
 
     //重连函数
@@ -164,9 +167,9 @@ export default {
                 //}
                 break;
               case 2:
-                //console.log("heart");
-                if (text["heartMesId"] == this.heartMesId)
-                  this.heartFlag = true;
+                if (text["heartMesId"] == this.heartMesId) {
+                  this.heartFlag = 1;
+                }
                 break;
             }
             //console.log(global_id)
@@ -175,8 +178,6 @@ export default {
           reader.readAsText(evt.data);
         } else if (evt.data.constructor == String) {
           let text = JSON.parse(evt.data);
-          console.log("text");
-          console.log(text);
 
           //if (this.global_id != text["uid"]) {
           // this.modify = 0;

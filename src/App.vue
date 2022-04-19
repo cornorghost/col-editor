@@ -72,6 +72,7 @@ export default {
     // this.$refs.gdialog.handleSuccess(); //打开成功消息提示
     this.$refs.monaco.bind();
     this.$refs.websock.bind();
+    this.$refs.websock.beginPing();
   },
   created() {},
   data() {
